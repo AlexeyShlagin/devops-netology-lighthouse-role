@@ -1,0 +1,26 @@
+---
+# tasks file for lighthouse
+- name: Installing nginx
+  become: true
+  ansible.builtin.apt:
+    name: nginx
+    state: present
+- name: Copying lighthouse repo
+  become: true
+  ansible.builtin.git:
+    repo: "{{ lighthouse_repo }}"
+    dest: "{{ lighthouse_dest }}"
+    version: master
+- name: Adding available site
+  become: true
+  ansible.builtin.template:
+    src: ./templates/lighthouse.j2
+    dest: /etc/nginx/sites-available/lighthouse
+    mode: "644"
+- name: Create simlink lighthouse enable
+  become: true
+  ansible.builtin.file:
+    src: /etc/nginx/sites-available/lighthouse
+    dest: /etc/nginx/sites-enabled/lighthouse
+    state: link
+  notify: Start nginx service
